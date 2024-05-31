@@ -4,6 +4,74 @@
 
 An all-in-one tool for Polkadot development.
 
+## Demo
+
+* Slides: https://hackmd.io/zcIyOfpZQfamVPivipp18Q
+
+* Build and run Docker container
+```bash
+docker build --platform linux/x86_64 -f ./Dockerfile --tag pop-cli:v0.1.0 ./
+docker run --platform linux/x86_64 \
+  -p 40000-47000:40000-47000 \
+  -p 30333:30333 \
+  -p 9933:9933 \
+  -p 9944:9944 \
+  -p 9615:9615 \
+  -it -d --hostname pop-cli --name pop-cli --volume ./:/pop:rw pop-cli:v0.1.0
+```
+
+* Enter Docker container
+```bash
+docker exec -it pop-cli /bin/bash
+```
+Note: Alternatively, use `--publish-all`
+
+* Build and copy binary to PATH
+```bash
+cargo build --release
+cp -f ./target/release/pop /usr/bin
+```
+
+* Configure Git (if necessary)
+```bash
+git config --global user.name "Luke Schoen"
+git config --global user.email "ltfschoen@gmail.com"
+```
+
+* Run Pop!
+```bash
+./target/release/pop new parachain clawbird-parachain --symbol CLAW --decimals 12 --endowment 1_000_000_000
+```
+
+```
+# Select a template provider: Pop
+# Select the type of parachain: Contracts
+# Select a specific release: Polkadot v1.9 (polkadot-v1.9.0 / bbd9867)
+# Where should your project be created? ./clawbird-parachain
+# What is the symbol of your parachain token? CLAW
+# How many token decimals? 12
+# And the initial endowment for dev accounts? 1u64 << 60
+```
+
+* Note: The above creates a template based on:
+  * https://github.com/r0gue-io/contracts-parachain
+  * which is based on fork of: https://github.com/r0gue-io/base-parachain,
+  * which is based on fork of: https://github.com/paritytech/polkadot-sdk/tree/master/templates/parachain
+
+* Configure VS Code to edit the parachain code:
+  * VS Code > Docker > pop-cli:v0.1.0 (accfaf511f7d) > Attach VS Code > Open Folder > /pop
+
+* Build parachain
+```bash
+cd /pop/clawbird-parachain
+pop build parachain --path ./
+```
+
+* Launch parachain on local network using Zombienet SDK
+```bash 
+RUST_LOG=debug pop up parachain -f ../tests/zombienet.toml -p https://github.com/r0gue-io/pop-node
+```
+
 ## Install
 
 You can install Pop CLI as follows:

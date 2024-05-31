@@ -1,11 +1,14 @@
 FROM rust as builder
-RUN apt-get update && apt-get -y install cmake
+
 WORKDIR /pop
 COPY . /pop
-RUN cargo build --release
 
-# Build image, preinstalling all dependencies for general Polkadot development
-FROM rust:slim
-COPY --from=builder /pop/target/release/pop /usr/bin/pop
-RUN apt-get update && pop install -y && apt-get clean
-CMD ["/usr/bin/pop"]
+RUN apt-get update && \
+  apt upgrade -y && \
+  apt-get -y install cmake protobuf-compiler libprotobuf-dev libclang-dev && \
+  cargo build --release && \
+  cargo install --locked --no-default-features --features contract,parachain --path ./crates/pop-cli && \
+  pop install -y
+
+CMD tail -f /dev/null
+
